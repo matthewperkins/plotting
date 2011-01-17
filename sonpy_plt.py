@@ -3,11 +3,12 @@ import re
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from NeuroTools.spike2.sonpy import son
+#from NeuroTools.spike2.sonpy import son
+from son import son
 from mpl_toolkits.axes_grid.axislines import Subplot
 
 # path for debug purposes
-os.chdir(os.path.expanduser('~' + os.sep + 'Documents' + os.sep + 'weiss_lab' + os.sep + 'b63_experiments' + os.sep + '2011_01_07'))
+os.chdir(os.path.expanduser('~' + os.sep + 'Documents' + os.sep + 'weiss_lab' + os.sep + 'B63_experiments' + os.sep + '2011_01_07'))
 
 
 def hideaxs(axes):
@@ -17,7 +18,46 @@ def hideaxs(axes):
     axes.axis["top"].set_visible(False)
     axes.axis["bottom"].set_visible(False)
     axes.axis["left"].set_visible(False)
+    axes.patch.set_alpha(0) # set the background of the plotting axes to be transparent 
 
+def smatrixedge(ncols, nrows, sindx, edge='b', byrow=False):
+    ## edge should equal 'b', 'l', 't', 'r', for bottow, left, top, right.
+    ## if matrix is made byrow = True, than single indexs(sindx) will
+    ## not jibe with the order that the matrix was orginally filled, to
+    ## work around I do some fancy divison, / is floor division, so
+    ## s / ncols + 1 will be the row index and s % ncols is
+    ## the col index, expanding this now to know if I am at any edge
+
+    if(byrow):
+        rindx = sindx/ncols+1 ## int/int is floor division
+        cindx = sindx%ncols    ## int%int is modulo 
+        if (cindx==0):
+            rindx = rindx-1; cindx = ncols
+        else:
+            cindx = sindx/nrows+1
+            rindx = sindx%nrows
+            if (rindx==0):
+                cindx = cindx-1; rindx = nrows
+                
+    if edge =='b':
+        if rindx==nrows:
+            return (True)
+        else:
+            return (False)
+    if edge == 'l':
+        if cindx==1:
+            return (True)
+        else: return (False)
+    if edge == 't':
+        if rindx==1:
+            return (True)
+        else:
+            return (False)
+    if edge == 'r':
+        if cindx==ncols:
+            return (True)
+        else: 
+            return (False)
 class comp_cc:
     def __init__(self,cntrlfname,expfname,chan_nums, chanlims):
         self.cntrlfname = cntrlfname
@@ -38,6 +78,7 @@ class comp_cc:
             self.expdata.append(son.Channel(i,self.expfname).data())
 
     def mk_axes_order(self, pair = False):
+        '''either splits number of columns in the plotting into top and bottom, or if pair = True, interleaves columns'''
         length = self.plot_cols
         cntrl = np.r_[1:(length/2)+1]
         exp = np.r_[(length/2) + 1 : length + 1]
@@ -105,28 +146,21 @@ class comp_cc:
                     self.set_which_subplot(chan, cond, block)
                     print(str(chan) + str(cond) + str(block))
                     print(self.currentsubplot.__repr__())
-                    self.currentsubplot.plot(self.pltdata)
+                    lnwdth = 0.5
+                    if cond == 0:
+                        linclr = 'black'
+                    else:
+                        linclr = 'blue'
+                    self.currentsubplot.plot(self.pltdata,color = linclr, linewidth = lnwdth)
                     hideaxs(self.currentsubplot)
 
+#    def mk_scale_bars(self)
 
-        ### need to return a list, or array where each element has channum, condition, and blocknum that will feed set_which_subplot
-        ### the order of these triples will needs to mesh with the byrow order that the subplots were created in.
 
-        #     ax = Subplot(ncol,nrow, currentplot)
-        #     ax.patch.set_alpha(0)
-        #     fig.add_subplot(ax)
-
-        # ax.plot(spkchancntrllist[j].data()[i], color = 'black', linewidth = 0.3)
-        # ax.plot(spkchanexplist[j].data()[i], color = 'blue', linewidth = 0.3)
-        # hideaxs(ax)
-        
-        
-            
 
 ###read data from spk2.smr
-testclass = comp_cc('2011_01_07_0005.mpd', '2011_01_07_0006.mpd',[7,8],[(-60,20),(0,2)])
-#testclass.plot_all()
+testclass = comp_cc('2011_01_07_0005.mpd', '2011_01_07_0006.mpd', [7,8] , [(-60,20),(0,2)] )
 testclass.plot_all()
-#testclass.setlims()
-testclass.fig.savefig('notworking.png')
+testclass.setlims()
+testclass.fig.savefig('notworking.svg')
 
