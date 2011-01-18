@@ -3,8 +3,8 @@ import re
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-#from NeuroTools.spike2.sonpy import son
-from son import son
+from NeuroTools.spike2.sonpy import son
+#from son import son
 from mpl_toolkits.axes_grid.axislines import Subplot
 
 # path for debug purposes
