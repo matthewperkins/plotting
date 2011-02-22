@@ -25,11 +25,11 @@ def dothescalebars(axes, xrngfrac, yrngfrac, xposfrac, yposfrac, xpadfrac, ypadf
     xscalebar = mkscalebar_length(xrngfrac, axes.get_xlim())
     xpos,ypos = mkscale_pos(axes,xposfrac,yposfrac)
     xpad,ypad = mkscale_plot_pad(axes, xpadfrac, ypadfrac)
-    
-    axes.plot([xpos - xscalebar, xpos], [ypos,ypos], color = '#140060')
-    axes.plot([xpos, xpos], [ypos + ypad, ypos + yscalebar + ypad], color = '#140060')
-    axes.text(xpos + xpad, ypos + ypad, str(yscalebar))
-    axes.text(xpos - (xscalebar/2), (ypos - ypad*3), str(xscalebar/10000), va = 'bottom',ha = 'left',)  ###NOTE need a better way to get back to seconds from data points !!!!!!!!!!!!!!!!
+
+    axes.plot([xpos, xpos], [ypos, ypos - yscalebar], color = '#140060')
+    axes.plot([xpos - xscalebar, xpos], [ypos - yscalebar - ypad, ypos - yscalebar - ypad], color = '#140060')
+    axes.text(xpos + 2*xpad, ypos - ypad, str(yscalebar))
+    axes.text(xpos - (xscalebar/2), ((ypos - yscalebar) - ypad*3), str(xscalebar/10000), va = 'top',ha = 'left',)  ###NOTE need a better way to get back to seconds from data points !!!!!!!!!!!!!!!!
 
 def mkscalebar_length(nominal_length_fraction, axslim):
     base = 10
@@ -163,17 +163,9 @@ class comp_cc:
         for cond in range(2):
             for block in range(self.numblocks):
                 for chan in self.chans:
-                    print 'start slm'
-                    print cond
-                    print block
-                    print chan
                     chanindx = self.chans.index(chan)
-                    print self.chanlims[chanindx]
                     self.set_which_subplot(chan,cond,block)
-                    print (self.currentsubplot.get_ylim())
                     self.currentsubplot.set_ylim(self.chanlims[chanindx])
-                    print (self.currentsubplot.get_ylim())
-                    print 'end slm'
 
     def set_diff_lims(self,yrangelist):
         ''' chan lims must be an array of tuples'''
@@ -206,9 +198,9 @@ class comp_cc:
                     chanindx = self.chans.index(chan)
                     self.set_which_subplot(chan,cond,block)
                     if (is_m_edge(self.fig.num_cols, self.fig.num_rows, subplotcntr, edge='r',byrow=True)):
-                        dothescalebars(self.currentsubplot, 0.1, 0.2, 0.05, 0.21, 0.01, 0.01)
+                        dothescalebars(self.currentsubplot, 0.1, 0.2, 0.05, 0.05, 0.01, 0.01)
                       # dothescalebars(axes, xrngfrac, yrngfrac, xposfrac, yposfrac, xpadfrac, ypadfrac):
-                        
+
                     subplotcntr = subplotcntr + 1
 
     def make_diff_scale_bars(self):
@@ -217,13 +209,13 @@ class comp_cc:
             for block in range(self.numblocks):
                 chanindx = self.chans.index(chan)
                 self.set_which_diff_subplot(chanindx,block)
-                if is_m_edge(self.diff_plot_cols, self.diff_plot_rows, subplotcntr, edge='r',byrow=True):
-                    dothescalebars(self.current_diff_subplot, 0.1, 0.2, 0.05, 0.21, 0.01, 0.01)
-                    subplotcntr = subplotcntr + 1
+                if (is_m_edge(self.diff_plot_cols, self.diff_plot_rows, subplotcntr, edge='r',byrow=True)):
+                    dothescalebars(self.current_diff_subplot, 0.1, 0.2, 0.05, 0.05, 0.01, 0.01)
+                subplotcntr = subplotcntr + 1
 
     def set_which_subplot(self, channum, condition, blocknum):
         chanindx = self.chans.index(channum)
-        
+
         if condition == 0:
             self.pltdata = self.cntrldata[chanindx][blocknum]
             self.currentsubplot = self.cntrlaxes[chanindx][blocknum] # again with the modulo
@@ -246,8 +238,6 @@ class comp_cc:
             for chan in self.chans:
                 for block in range(self.numblocks):
                     self.set_which_subplot(chan, cond, block)
-                    print(str(chan) + str(cond) + str(block))
-                    print(self.currentsubplot.__repr__())
                     if cond == 0:
                         linclr = '#140060'
                     else:
