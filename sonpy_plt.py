@@ -104,9 +104,6 @@ class comp_cc:
         else:
             print 'crap'
 
-    # class CompFig(matplotlibfig):
-    #     matfig.num_rows        
-
     def mk_axes_order(self):
         '''either splits number of columns in the plotting into top and bottom, or if pair = True, interleaves columns'''
         length = self.fig.num_cols
@@ -119,61 +116,9 @@ class comp_cc:
             self.cntrlord = cntrl
             self.expord = exp
 
-    def setlims(self,diff=False):
-        ''' chan lims must be an array of tuples'''
-        for cond in range(2):
-            for block in range(self.numblocks):
-                for chan in self.chans:
-                    print 'start slm'
-                    print cond
-                    print block
-                    print chan
-                    chanindx = self.chans.index(chan)
-                    print self.chanlims[chanindx]
-                    self.set_which_subplot(chan,cond,block)
-                    print (self.currentsubplot.get_ylim())
-                    self.currentsubplot.set_ylim(self.chanlims[chanindx])
-                    print (self.currentsubplot.get_ylim())
-                    print 'end slm'
-                    
-
-    def setxlims(self,diff=False):
-        if self.xlims == []:
-            return
-        ''' chan lims must be an array of tuples'''
-        for cond in range(2):
-            for block in range(self.numblocks):
-                for chan in self.chans:
-                    chanindx = self.chans.index(chan)
-                    self.set_which_subplot(chan,cond,block)
-                    self.currentsubplot.set_xlim(self.xlims[chanindx])
-
-    def make_scale_bars(self):
-        subplotcntr = 0
-        for chan in self.chans:
-            for cond in range(2):
-                for block in range(self.numblocks):
-                    chanindx = self.chans.index(chan)
-                    self.set_which_subplot(chan,cond,block)
-                    if (is_m_edge(self.fig.num_cols, self.fig.num_rows, subplotcntr, edge='r',byrow=True)):
-                        dothescalebars(self.currentsubplot, 0.1, 0.2, 0.05, 0.21, 0.01, 0.01)
-                      # dothescalebars(axes, xrngfrac, yrngfrac, xposfrac, yposfrac, xpadfrac, ypadfrac):
-                        
-                    subplotcntr = subplotcntr + 1
-
-    def make_diff_scale_bars(self):
-        subplotcntr = 0
-        for chan in self.chans:
-            for block in range(self.numblocks):
-                chanindx = self.chans.index(chan)
-                self.set_which_diff_subplot(chanindx,block)
-                if is_m_edge(self.diff_plot_cols, self.diff_plot_rows, subplotcntr, edge='r',byrow=True):
-                    dothescalebars(self.current_diff_subplot, 0.1, 0.2, 0.05, 0.21, 0.01, 0.01)
-                    subplotcntr = subplotcntr + 1
-
     def mk_axes(self, overdraw = False, pair = False):
         if self.cntrlaxes.__len__()!=0:
-            return
+            hreturn
 
         self.fig = plt.figure()
         self.fig.patch.set_alpha(0)
@@ -199,6 +144,83 @@ class comp_cc:
                 self.fig.add_subplot(tmpcntrlaxes)
                 self.fig.add_subplot(tmpexpaxes)
 
+    def mk_diff_axes(self):
+        if self.diff_axes.__len__()!=0:
+            return
+        self.diff_fig = plt.figure()
+        self.diff_plot_rows = len(self.chans)
+        self.diff_plot_cols = self.numblocks
+        for i, chan in enumerate(self.chans):
+            self.diff_axes.append([])
+            for plotnum in range(self.numblocks):
+                tmpdiffaxes = Subplot(self.diff_fig, self.diff_plot_rows, self.diff_plot_cols, plotnum+1 + (i*self.diff_plot_cols))
+                self.diff_axes[i].append(tmpdiffaxes)
+                ### have to add each axis to object figure
+                self.diff_fig.add_subplot(tmpdiffaxes)
+
+    def setlims(self,diff=False):
+        ''' chan lims must be an array of tuples'''
+        for cond in range(2):
+            for block in range(self.numblocks):
+                for chan in self.chans:
+                    print 'start slm'
+                    print cond
+                    print block
+                    print chan
+                    chanindx = self.chans.index(chan)
+                    print self.chanlims[chanindx]
+                    self.set_which_subplot(chan,cond,block)
+                    print (self.currentsubplot.get_ylim())
+                    self.currentsubplot.set_ylim(self.chanlims[chanindx])
+                    print (self.currentsubplot.get_ylim())
+                    print 'end slm'
+
+    def set_diff_lims(self,yrangelist):
+        ''' chan lims must be an array of tuples'''
+        for c, chan in enumerate(self.chans):
+            map(lambda axinst: axinst.set_ylim(yrangelist[c]), self.diff_axes[c])
+
+    def setxlims(self,diff=False):
+        if self.xlims == []:
+            return
+        ''' chan lims must be an array of tuples'''
+        for cond in range(2):
+            for block in range(self.numblocks):
+                for chan in self.chans:
+                    chanindx = self.chans.index(chan)
+                    self.set_which_subplot(chan,cond,block)
+                    self.currentsubplot.set_xlim(self.xlims[chanindx])
+
+    def set_diff_xlims(self,xrangelist):
+        ''' chan lims must be an array of tuples'''
+        for b in range(self.numblocks):
+            for c, chan in enumerate(self.chans):
+                self.set_which_diff_subplot(c,b)
+                self.current_diff_subplot.set_xlim(xrangelist[c])
+
+    def make_scale_bars(self):
+        subplotcntr = 0
+        for chan in self.chans:
+            for cond in range(2):
+                for block in range(self.numblocks):
+                    chanindx = self.chans.index(chan)
+                    self.set_which_subplot(chan,cond,block)
+                    if (is_m_edge(self.fig.num_cols, self.fig.num_rows, subplotcntr, edge='r',byrow=True)):
+                        dothescalebars(self.currentsubplot, 0.1, 0.2, 0.05, 0.21, 0.01, 0.01)
+                      # dothescalebars(axes, xrngfrac, yrngfrac, xposfrac, yposfrac, xpadfrac, ypadfrac):
+                        
+                    subplotcntr = subplotcntr + 1
+
+    def make_diff_scale_bars(self):
+        subplotcntr = 0
+        for chan in self.chans:
+            for block in range(self.numblocks):
+                chanindx = self.chans.index(chan)
+                self.set_which_diff_subplot(chanindx,block)
+                if is_m_edge(self.diff_plot_cols, self.diff_plot_rows, subplotcntr, edge='r',byrow=True):
+                    dothescalebars(self.current_diff_subplot, 0.1, 0.2, 0.05, 0.21, 0.01, 0.01)
+                    subplotcntr = subplotcntr + 1
+
     def set_which_subplot(self, channum, condition, blocknum):
         chanindx = self.chans.index(channum)
         
@@ -210,6 +232,13 @@ class comp_cc:
             self.currentsubplot = self.expaxes[chanindx][blocknum]
         else:
             print 'condition arguement is not right'
+
+    def set_which_diff_subplot(self, chanindx, blocknum):
+        if chanindx == 0:
+            self.diff_plt_data = np.array([self.cntrldata[chanindx][blocknum],self.expdata[chanindx][blocknum]])
+        else:
+            self.diff_plt_data = self.expdata[chanindx][blocknum] - self.cntrldata[chanindx][blocknum]
+        self.current_diff_subplot = self.diff_axes[chanindx][blocknum%(self.diff_plot_cols)] # again with the modulo
 
     def plot_all(self, addline=False, lineat=-65, **keywords):
         subplotcounter = 0
@@ -240,48 +269,22 @@ class comp_cc:
                     self.current_diff_subplot.plot(self.diff_plt_data, **keywords)
                     self.current_diff_subplot.axhline(0, linestyle= 'dashed', color = 'grey')
                 hideaxs(self.current_diff_subplot)
-###this is not working        
-    def set_diff_lims(self,yrangelist):
-        ''' chan lims must be an array of tuples'''
-        for c, chan in enumerate(self.chans):
-            map(lambda axinst: axinst.set_ylim(yrangelist[c]), self.diff_axes[c])
 
-    def set_diff_xlims(self,xrangelist):
-        ''' chan lims must be an array of tuples'''
-        for b in range(self.numblocks):
-            for c, chan in enumerate(self.chans):
-                self.set_which_diff_subplot(c,b)
-                self.current_diff_subplot.set_xlim(xrangelist[c])
-
-    def set_which_diff_subplot(self, chanindx, blocknum):
-        if chanindx == 0:
-            self.diff_plt_data = np.array([self.cntrldata[chanindx][blocknum],self.expdata[chanindx][blocknum]])
+    def add_stock_title(self, string='', x=0.5, y=0.98, **keywords):
+        cntrlname = os.path.basename(self.cntrlfname).split('.')[0]
+        expname = os.path.basename(self.expfname).split('.')[0]
+        if not(string==''):
+            self.fig.suptitle(string, x=x, y=y)
         else:
-            self.diff_plt_data = self.expdata[chanindx][blocknum] - self.cntrldata[chanindx][blocknum]
-        self.current_diff_subplot = self.diff_axes[chanindx][blocknum%(self.diff_plot_cols)] # again with the modulo
-                ### I think this could be part of the problem ###, the modulo
+            self.fig.suptitle(cntrlname, x = 0.2, y=0.98,color= '#140060', **keywords)
+            self.fig.suptitle(expname, x = 0.7, y=0.98,color= '#B43EDE',**keywords)
 
-    def mk_diff_axes(self):
-        if self.diff_axes.__len__()!=0:
-            return
-        self.diff_fig = plt.figure()
-        self.diff_plot_rows = len(self.chans)
-        self.diff_plot_cols = self.numblocks
-        for i, chan in enumerate(self.chans):
-            self.diff_axes.append([])
-            for plotnum in range(self.numblocks):
-                tmpdiffaxes = Subplot(self.diff_fig, self.diff_plot_rows, self.diff_plot_cols, plotnum+1 + (i*self.diff_plot_cols))
-                self.diff_axes[i].append(tmpdiffaxes)
-                ### have to add each axis to object figure
-                self.diff_fig.add_subplot(tmpdiffaxes)
-
-    # def mk_scale_bars(self,figure)
-
-
-
-###read data from spk2.smr
-# testclass = comp_cc('2011_01_07_0005.mpd', '2011_01_07_0006.mpd', [7,8] , [(-60,20),(0,2)] )
-# testclass.plot_all()
-# testclass.setlims()
-# testclass.fig.savefig('notworking.svg')
+    def add_stock_diff_title(self, string='', x=0.5, y=0.98, **keywords):
+        cntrlname = os.path.basename(self.cntrlfname).split('.')[0]
+        expname = os.path.basename(self.expfname).split('.')[0]
+        if not(string==''):
+            self.diff_fig.suptitle(string, x=x, y=y)
+        else:
+            self.diff_fig.suptitle(cntrlname, x = 0.2, y=0.98,color= '#140060', **keywords)
+            self.diff_fig.suptitle(expname, x = 0.7, y=0.98,color= '#B43EDE',**keywords)
 
