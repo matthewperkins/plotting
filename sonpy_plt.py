@@ -4,6 +4,7 @@ import math
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import datetime
 plt.rcParams['figure.subplot.hspace'] = 0.001
 from NeuroTools.spike2.sonpy import son
 import pdb
@@ -69,6 +70,15 @@ def hideaxs(axes):
     axes.axis["bottom"].set_visible(False)
     axes.axis["left"].set_visible(False)
     axes.patch.set_alpha(0) # set the background of the plotting axes to be transparent
+
+def get_time_diff(firstfilename, secondfilename):
+    firstfiletime = datetime.datetime.fromtimestamp(os.path.getmtime(firstfilename))
+    secondfiletime = datetime.datetime.fromtimestamp(os.path.getmtime(secondfilename))
+
+    td = secondfiletime - firstfiletime
+    timediff_sec = (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6) / 10**6
+    timediff_min = timediff_sec/60.
+    return timediff_sec, timediff_min
 
 class comp_cc:
     def __init__(self, cntrlfname, expfname, chan_nums, chanlims, xlims=[], pair=False):
@@ -261,6 +271,7 @@ class comp_cc:
                 hideaxs(self.current_diff_subplot)
 
     def add_stock_title(self, string='', x=0.5, y=0.98, **keywords):
+        timediff_sec, timediff_min  = get_time_diff(self.cntrlfname, self.expfname)
         cntrlname = os.path.basename(self.cntrlfname).split('.')[0]
         expname = os.path.basename(self.expfname).split('.')[0]
         if not(string==''):
@@ -268,8 +279,10 @@ class comp_cc:
         else:
             self.fig.suptitle(cntrlname, x = 0.2, y=0.98,color= '#140060', **keywords)
             self.fig.suptitle(expname, x = 0.7, y=0.98,color= '#B43EDE',**keywords)
+            self.fig.suptitle(str(np.round(timediff_min,2)), x = 0.5, y = 0.98, color = 'black')
 
     def add_stock_diff_title(self, string='', x=0.5, y=0.98, **keywords):
+        timediff_sec, timediff_min  = get_time_diff(self.cntrlfname, self.expfname)
         cntrlname = os.path.basename(self.cntrlfname).split('.')[0]
         expname = os.path.basename(self.expfname).split('.')[0]
         if not(string==''):
@@ -277,4 +290,10 @@ class comp_cc:
         else:
             self.diff_fig.suptitle(cntrlname, x = 0.2, y=0.98,color= '#140060', **keywords)
             self.diff_fig.suptitle(expname, x = 0.7, y=0.98,color= '#B43EDE',**keywords)
+            self.diff_fig.suptitle(str(np.round(timediff_min,2)), x = 0.5, y = 0.98, color = 'black')
+
+    def clean_up(self):
+        plt.close(self.fig)
+        plt.close(self.diff_fig)
+
 
