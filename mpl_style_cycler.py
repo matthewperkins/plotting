@@ -125,7 +125,7 @@ class cycling_dict(OrderedDict):
             for k in self.keys():
                 ro, self._result[k] = self._key_list_ro_itr[k].next()
             self._initial_par_set = False
-            return self._result
+            return self._result.copy()
         else:
             k = self._itr_order[ord_num]
             ro, self._result[k] = self._key_list_ro_itr[k].next()
@@ -135,7 +135,7 @@ class cycling_dict(OrderedDict):
                     next_ord = 0
                 self._next_par_set(ord_num = next_ord)
                 return self._result
-            return self._result
+            return self._result.copy()
 
 MHP_default = simple_style_dict  = {\
                'marker':['s','o','v', '^', '>', '<'],
