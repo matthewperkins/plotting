@@ -134,7 +134,7 @@ class cycling_dict(OrderedDict):
                 if next_ord==len(self._itr_order):
                     next_ord = 0
                 self._next_par_set(ord_num = next_ord)
-                return self._result
+                return self._result.copy()
             return self._result.copy()
 
 MHP_default = simple_style_dict  = {\
