@@ -36,6 +36,7 @@ def iV_spines(ax):
     ax.xaxis.set_ticks_position('bottom')
     ax.yaxis.set_ticks_position('left')
 
+
 def ramp_spines(ax):
     for loc, spine in ax.spines.iteritems():
         if loc in ['left','bottom']:
@@ -81,6 +82,13 @@ def clean_axes(ax, left_most = True, bottom_most = True):
     elif left_most==True:
         setp(ax.get_yticklabels(), visible = True)
     reasonable_ticks(ax)
+
+def trace_axes(ax)
+    from matplotlib.pyplot import setp
+    for loc, spine in ax.spines.iteritems():
+        spine.set_color('none') # don't draw spine
+    setp(ax.get_xticklabels(), visible = False)
+    setp(ax.get_yticklabels(), visible = False)
 
 def tiny_axes(ax):
     params = {'axes.labelsize': 10,
