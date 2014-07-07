@@ -83,7 +83,7 @@ def clean_axes(ax, left_most = True, bottom_most = True):
         setp(ax.get_yticklabels(), visible = True)
     reasonable_ticks(ax)
 
-def trace_axes(ax)
+def trace_axes(ax):
     from matplotlib.pyplot import setp
     for loc, spine in ax.spines.iteritems():
         spine.set_color('none') # don't draw spine
